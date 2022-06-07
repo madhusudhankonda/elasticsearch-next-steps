@@ -119,4 +119,200 @@ POST _bulk
 {"index":{"_index":"movies","_id":"25"}}
 {"title": "Life Is Beautiful","synopsis": "When an open-minded Jewish librarian and his son become victims of the Holocaust, he uses a perfect mixture of will, humor, and imagination to protect his son from the dangers around their camp.","actors": ["Roberto Benigni", "Nicoletta Braschi", "Giorgio Cantarini", "Giustino Durano"] ,"director":" Roberto Benigni ","rating":"8.6","certificate":"PG-13","genre": ["Comedy", "Drama", "Romance"],"release_date":"14-09-2012"} 
 
-```
+
+
+# Fetching the movies with a specific rating
+GET movies/_search
+{
+  "query": {
+    "term": {
+      "certificate": "R"
+    }
+  }
+}
+
+# Fetching the movies by lowercasing the rating
+# No results returned
+GET movies/_search
+{
+  "query": {
+    "term": {
+      "certificate": "r"
+    }
+  }
+}
+# This term query wouldn't return the results
+GET movies/_search
+{
+  "query": {
+    "term": {
+      "title": "The Godfather" 
+    }
+  }
+}
+
+# Terms query
+GET movies/_search
+{
+  "query": {
+    "terms": { 
+      "certificate": ["PG-13","R"]
+    }
+  }
+}
+
+# IDs query
+GET movies/_search
+{
+  "query": {
+    "ids": {
+      "values": [10,4,6,8]
+    }
+  }
+}
+
+# Terms query fetching IDs
+GET movies/_search
+{
+  "query": {
+    "terms": {
+    "_id":[10,4,6,8]
+    }
+  }
+}
+
+
+# Range query
+GET movies/_search
+{
+  "query": {
+    "range": {
+      "rating": {
+        "gte": 9.0,
+        "lte": 9.5
+      }
+    }
+  }
+}
+
+GET movies/_search
+{
+  "query": {
+    "range": {
+      "release_date": {
+        "gte": "01-01-1970"
+      }
+    }
+  },
+  "sort": [
+    {
+      "release_date": {
+        "order": "asc"
+      }
+    }
+  ]
+}
+
+# Range query with date math
+GET movies/_search
+{
+  "query": {
+    "range": {
+      "release_date": {
+        "lte": "15-02-1995||+2d"
+      }
+    }
+  }
+}
+
+# Wildcard Query with a wildcard at the end
+GET movies/_search
+{
+  "query": {
+    "wildcard": { 
+      "title": {
+        "value": "god*"
+      }
+    }
+  }
+}
+
+# Wildcard Query with a wildcard in middle
+GET movies/_search
+{
+  "_source": false, 
+  "query": {
+    "wildcard": { 
+      "title": {
+        "value": "g*d"
+      }
+    }
+  },
+  "highlight": {
+    "fields": {
+      "title": {}
+    }
+  }
+}
+
+# Prefix query 
+GET movies/_search
+{
+  "query": {
+    "prefix": {
+      "genre.original": {
+        "value": "Ad"
+      }
+    }
+  },"highlight": {
+   "fields": {"genre.original": {}} 
+  }
+}
+
+PUT boxoffice_hit_movies/_doc/1
+{
+  "title":"Gladiator"
+}
+
+GET boxoffice_hit_movies/_search
+{
+  "query": {
+    "prefix": {
+      "title": {
+        "value": "gla"
+      }
+    }
+  }
+}
+
+# Fuzzy query with edit distance of 1
+GET movies/_search
+{
+  "query": {
+    "fuzzy": {
+      "genre": {
+        "value": "rama",
+        "fuzziness": 1
+      }
+    }
+  },
+  "highlight": {
+    "fields": {
+      "genre": {}
+    }
+  }
+}
+
+# Fuzzy query that has two letters missing
+GET movies/_search
+{
+  "query": {
+    "fuzzy": {
+      "genre": {
+        "value": "ama",
+        "fuzziness": 2
+      }
+    }
+  }
+}
+
